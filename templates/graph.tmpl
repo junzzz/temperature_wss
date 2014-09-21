@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+    <script src="/js/highcharts.js"></script>
+    <script src="/js/themes/dark-unica.js"></script>
+    <style>
+        body{
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+<div id="container_temp"></div>
+<div id="container_press"></div>
+
+<script>
+$(function(){
+    var loading = false,
+            chart,
+            chart2;
+    $('#container_temp').highcharts({
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'room temperature'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: []
+        },
+        yAxis: {
+            title: {
+                text: 'Temperature (°C)'
+            },
+            min: -10,
+            max: 40,
+            tickInterval: 5
+
+        },
+        plotOptions: {
+            line: {
+                dataLabels: {
+                    enabled: true
+                },
+                enableMouseTracking: false
+            }
+        },
+        series: [{
+            name: 'room temperature',
+            data: []
+        }]
+    });
+    chart = $('#container_temp').highcharts();
+    $('#container_press').highcharts({
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Pressure'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: []
+        },
+        yAxis: {
+            title: {
+                text: 'Pressure（hPa)'
+            },
+            min: 900,
+            max: 1100,
+            tickInterval: 20
+        },
+        plotOptions: {
+            line: {
+                dataLabels: {
+                    enabled: true
+                },
+                enableMouseTracking: false
+            }
+        },
+        series: [{
+            name: 'Pressure',
+            data: []
+        }]
+    });
+    chart2 = $('#container_press').highcharts();
+    chart.showLoading();
+    chart2.showLoading();
+
+    var c = new WebSocket('ws://localhost:3000/ws');
+    c.onopen = function(){
+        c.onmessage = function(response){
+            var json = JSON.parse(response.data);
+            var timed = [];
+            var temps = [];
+            var press = [];
+
+            for(var i = json.length - 1; i >= 0; i--){
+                timed.push(json[i].Datetime);
+                temps.push(json[i].Temp);
+                press.push(json[i].Pressure);
+            }
+            $('#container_temp').highcharts({
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'room temperature'
+                },
+                subtitle: {
+                    text: ''
+                },
+                xAxis: {
+                    categories: timed
+                },
+                yAxis: {
+                    title: {
+                        text: 'Temperature (°C)'
+                    },
+                    min: -10,
+                    max: 40,
+                    tickInterval: 5
+
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: false
+                    }
+                },
+                series: [{
+                    name: 'room temperature',
+                    data: temps
+                }]
+            });
+
+            $('#container_press').highcharts({
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Pressure'
+                },
+                subtitle: {
+                    text: ''
+                },
+                xAxis: {
+                    categories: timed
+                },
+                yAxis: {
+                    title: {
+                        text: 'Pressure（hPa)'
+                    },
+                    min: 900,
+                    max: 1100,
+                    tickInterval: 20
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: false
+                    }
+                },
+                series: [{
+                    name: 'Pressure',
+                    data: press
+                }]
+            });
+            if(loading){
+                chart.hideLoading();
+                chart2.hideLoading();
+                loading = false;
+            }
+        };
+
+    }
+
+});
+
+</script>
+</body>
+</html>

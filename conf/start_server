@@ -1,0 +1,4 @@
+#!/bin/sh
+# 起動スクリプト
+cd /apps/
+./temp_websocket_server
